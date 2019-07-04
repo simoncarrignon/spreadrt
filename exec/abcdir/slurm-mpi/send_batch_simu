@@ -1,0 +1,7 @@
+
+for i in {201..2000};
+do
+    echo "running generatedParameters/generatedParameters$i"
+    sbatch Rmpiscript-mn4_splitted_large generatedParameters/generatedParameters$i testneutralRumorsVF "large"
+    sbatch Rmpiscript-mn4_splitted_small generatedParameters/generatedParameters$i testneutralRumorsVF "small"
+done

@@ -1,0 +1,682 @@
+---
+title: "Modeling the spread of news on Twitter"
+author: "Simon Carrignon , Alex Bentley, Michael Gilchrist, Damian Ruck"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    fig_caption: true
+fontsize: 11pt
+documentclass: article
+vignette: >
+  %\VignetteIndexEntry{Modeling the spread of news on Twitter}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+---
+
+
+```{r, include = FALSE}
+h = 5
+w = 5
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(fig.height=h,fig.width=w,fig.align = "center", eval = !is_check)
+knitr::opts_knit$set(global.par = TRUE) 
+library(spread)
+```
+
+```{r, include = FALSE}
+par(mar=c(5,5,1,1))
+defl <- par()
+```
+
+
+```{r, include = FALSE}
+devtools::load_all()
+```
+# Abstract
+
+A recent study by Vosoughi et al. (2018) revealed that the spread of news in online social media exhibit different statistical properties given the veracity of the news. They showed, using various metrics made on the cascade of transmission of information, that false news travel farther and faster than true ones, thus suggesting that the intrinsic value of the information shared on social media may impact the way this information travel. The goal of our current paper is to develop a model to test and compare hypothesis to explain the processes behind these differences. More precisely, we think that different level of sensibilities among the people participating in those cascades is an important factor explaining the difference observed by Vosoughi et al.
+
+To illustrate that, we used a model developed by Ruck et al. (2017) to explore changes in the popularity of words in the English vocabulary. We added to this model the possibility for the agents to recognize the content of the information and a sensibility toward this information. Thus, an agent can be actively willing to share only one kind of information, or they can be neutral toward it, and share equally any kind of information. Then, the probability of an agent to share one kind of information will depend on 1/ the sensibility of the agent toward this kind of information and 2/ the distribution of the other kind of information the agent has access to.
+
+We show here that this model can reproduce most of the properties observed by Vosoughi et al (2018). Moreover, and given the availability of the data used in the original paper, we applied Approximate Bayesian Computation to find what mixture of sensibilities among the actual social media actors has the highest probability to reproduce the difference observed.
+
+
+## Installing the *spread* package
+
+Stable versions of the *spread* package should be, at some point, directly installed from CRAN (using the command `install.packages("nameofthepackage")`), whilst the development version can be installed from the [github repository](https://github.com/simoncarrignon/spread) using the following command (the function requires the *devtools* package):
+
+```{r,eval=FALSE}
+devtools::install_github("simoncarrignon/twitter-spread")
+```
+
+Notice that so far it's,  and still will be for a long, _only_ a  development version. There is not even yet a master branch to the git. 
+
+# Exploration of the original dataset
+
+## Reproduction of result from Vosoughi _et al._ (2018)
+Given the dataset available in `data(allca)`, we can reproduce the key elements presented by Vosoughi et al. 2018.
+
+```{r real-data,fig.cap="reproduction of Vosoughi results.",fig.width=1.8*h,message=FALSE,warning=FALSE}
+par(mfrow=c(1,3),mar=c(5,5,2,1))
+for( m in c("size","depth","breadth")){
+    plotCCFD(allca[,m],main=paste("cascade",m),xlab=m)
+    pointsCCFD(mixedca[,m],col="orange")
+    pointsCCFD(falseca[,m],col="red")
+    pointsCCFD(trueca[,m],col="green")
+    legend("bottomleft",legend=c("true","false","mixed","all"),col=c("green","red","orange","black"),pch=20)
+}
+```
+
+We can check how the three measure are correlated:
+
+
+```{r corel-measurment,fig.width=1.8*h,message=FALSE,warning=FALSE}
+par(mfrow=c(1,3),mar=c(5,5,1,1))
+plot(allca$size ~ allca$breadth,log="xy",ylab="cascades size",xlab="cascade breadth")
+plot(allca$size ~ allca$depth,log="xy",ylab="cascades size",xlab="cascade depth")
+plot(allca$depth ~ allca$breadth,log="xy",ylab="cascades depth",xlab="cascade breadth")
+```
+We can clearly see that the main driver of the size of the cascades is the breadth, _ie_ the number of simultaneous retweets.
+
+
+
+## Rate of apparition
+### New Cascades 
+The dataset (`data(allca)`) gives for each cascade the exact date of apparition of this cascade. A cascade is a single tweet, which will be retweeted a certain amount of time (or not, in which case the size of the cascade is $1$). Different cascades can spread the same kind of information _ie_ the same rumor.
+
+Using that, we can see  how many new cascades appear every month/days/hour...
+
+
+```{r cascades-num,fig.cp="Number that appeared every days (left) and every hours (right)",message=F,fig.width=1.5*w,warning=F}
+par(mfrow=c(1,2))
+par(mar=c(5,5,1,1))
+
+alldate=as.POSIXct(allca$date)
+
+allca$hours=strptime(alldate,format="%Y-%m-%d %H", tz="GMT") #trunc by hours
+allca$days=strptime(alldate,format="%Y-%m-%d", tz="GMT")     #trunc by days
+allca$years=strptime(alldate,format="%Y", tz="GMT")     #trunc by year 
+
+plot(sort(unique(allca$days)),as.numeric(table(sort(allca$days-min(allca$days)))),type="l",log="y",ylim=c(1,2000),ylab="new cascades",xlab="day",cex=.8)
+plot(sort(unique(allca$hours)),as.numeric(table(sort(allca$hours-min(allca$hours)))),type="l",log="y",ylim=c(1,1000),ylab="new cascades",xlab="hours",cex=.8)
+plot(sort(unique(allca$years)),as.numeric(table(sort(allca$years-min(allca$years)))),type="l",ylab="new cascades",xlab="years",cex=.8)
+```
+
+### New Rumors
+Given that  we also know the id of the rumor carried by every cascade, we can look when was the first time that a unique rumor appears.  
+
+Knowing that, it's possible to calculate the probability that a new rumor appears every month/day/hours. We can in turn generate some rate of introduction of new cascade.
+
+    
+```{r new-rumor-d,fig.cap="Number of new rumor for each day of the dataset (left), probability of apparition of a new rumor during one day at any given day (right)",fig.width=1.5*w}
+par(mfrow=c(1,2),mar=c(5,5,1,1))
+rateintro=sort(tapply(allca$days-min(allca$days),allca$rumor_id,min)) #for each rumor we assign the date of the first cascade that's spread it.
+alldayz=seq(min(rateintro),max(rateintro),3600*24) #generate all possible days, will be used to avoid skipping the day whith not new rumors in order to to take into account the day where number of rumor = 0
+freqD=as.numeric(table(factor(rateintro,levels=alldayz)))
+plot(as.POSIXct(alldayz,origin=min(allca$days),tz="GMT"),freqD,type="l",xlab="days",ylab="new rumors",cex=.8)     
+plot(density(freqD,bw=1,from=0),xlab="Proba of new rumors during one day",main="")
+```
+
+```{r new-rumor-h,fig.cap="Number of new rumor for each hour of the dataset (left), probability of apparition of a new rumor during one hour at any given hour (right)",fig.width=1.5*w}
+par(mfrow=c(1,2),mar=c(5,5,1,1))
+##repeat all the same than befor but using the hourly split
+rateintro=sort(tapply(allca$hours-min(allca$hours),allca$rumor_id,min))
+allhourz=seq(min(rateintro),max(rateintro),3600) #generate all possible hours
+freqH=as.numeric(table(factor(rateintro,levels=allhourz)))
+plot(as.POSIXct(allhourz,origin=min(allca$hours),tz="GMT"),freqH,type="l",xlab="hours",ylab="new rumors",cex=.8)     
+plot(density(freqH,bw=1,from=0),xlab="Proba of new rumor during one hour",main="")
+```
+
+
+# Random Copy Model
+
+Ruck et al. (2017) have proposed a variation of the random copy model by Bentley et al 2002 to study change in vocabulary in the English litterature. A version of this model is available in this package using the function `randomCascades`.
+The simplest way to use it is to run it with the default arguments
+
+```{r}
+onerun=randomCascades()
+summary(onerun)
+```
+Thus `onerun` countains the final result in the form of a 3-columns table where the colon correspon to the rank, the size and the id of the last retweeter for each cascades.
+
+It's easy to plot the CCFD of the size of each cascades from this table by using the funciton [`plotCCFD()`](../../man/plotCCFD.Rd)
+
+```{r,fig.width=w,fig.height=h}
+par(mfrow=c(1,1))
+plotCCFD(onerun$size,xlab="cascade size",main="cascade size for default model") 
+```
+
+It's also easy to explore the impact of the different parameters on this model. Let's try with less number of time step and less agents
+
+
+```{r,fig.width=w,fig.height=h}
+shorter=randomCascades(t_steps = 10,Nmin = 10000)
+plotCCFD(shorter$size,xlab="cascades size",main="Cascade size for shorter model",col="grey")
+```
+
+One can also compare the result of the simulation to the real cascades observed in the dataset as shown previously.
+
+```{r compare-data,fig.width=w,fig.height=h,fig.cap="compare with data"}
+data(allca)
+plotCCFD(allca$size,xlab="cascades size",col="black")
+pointsCCFD(shorter$size,col="grey")
+legend("bottomleft",legend=c("data","simulation (short)"),col=c("black","grey"),pch=20)
+```
+
+## Eploration of the model 
+One can explore more in depth the model. For example the impact of $\mu$ on the CCFD given the length of the simulations 
+
+```{r,fig.width=1.8*w, fig.height=1.8*h}
+mu=10^seq(-5,-1,length.out=20) #a sequence of 20 different mu logarithmically spaced from 10^-5 to 10^-1
+step=seq(10,90,length.out=4) #a sequence of different number of step
+cols=heat.colors(length(mu)) #creat colors for each mu
+
+par(mfrow=c(2,2),mar=c(5,5,3,1))
+for(s in step){  
+    plotCCFD(1,1,type="n",ylim=c(0.01,100),xlim=c(1,10000),main=paste("time=",round(s)))
+    sapply(1:length(mu),function(i)
+           {
+               pointsCCFD(randomCascades(Nmin=1000,tau=1,t_steps=s,mu=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
+           }
+    )
+}
+```
+
+or the number of agents
+
+```{r,fig.width=w*1.8, fig.height=h*1.8}
+par(mfrow=c(2,2))
+nagent=c(100,1000,10000,20000) #a sequence of different number of step
+for(n in nagent){
+    plotCCFD(1,1,type="n",ylim=c(0.0001,100),xlim=c(1,100000),main=paste("Num of Agents=",n))
+    sapply(1:length(mu),function(i)
+           {
+               pointsCCFD(randomCascades(Nmin=n,tau=1,t_steps=s,mu=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
+           }
+    )
+}
+```
+
+
+## Simple comparison with dataset
+We have shown how to simply compare the output of a simulation with the data from `data(allca)` in \ref{fig:compare}. 
+
+
+```{r,include=FALSE,results='hide',fig.keep='all'}
+data(allca)
+plotCCFD(allca$size,col="black",xlab="rumor size")
+pointsCCFD(shorter$size,col="grey")
+legend("bottomleft",legend=c("data","simulation (short)"),col=c("black","grey"),pch=20)
+```
+
+If we compare this with the quick exploration of the simulation we did in the previous section, it appears clearly that this model will hardly be able to reproduce the distributions observed in dataset.  
+
+Nonetheless, the model implemented here doest not make a difference between a cascade and the rumor propagate by its cascade: the number of time a unique information is shared is exactly equal to the size of the cascade.
+
+Or the distribution of the size in the original dataset are drawn counting each cascade sizes, as Vosoughi et al. considere it. For them each cascade is a different entity with a different size. You can have multiple cascades spreading the same rumor and you will cont them as two separate cascades of different sizes. 
+
+This is somehow counter-intuitive if we want to consider the spread of the information carried by the cascade. This information correspond to different rumors that one could expect to be the unit on which the metrics should be considered. 
+
+To express that, the graph of the section 1 have to be redraw this time by summing the size of all the cascades carrying the same rumors.  In this case, the size will be directly the number of time a rumor has been shared, without regarding if this rumours has been share via different cascades, which is how the spread of information is implemented in the `randomCascades` model.
+
+
+```{r}
+allru=c()
+allru$size=tapply(allca$size,allca$rumor_id,sum)
+
+trueru=c()
+trueru$size=tapply(trueca$size,trueca$rumor_id,sum)
+
+falseru=c()
+falseru$size=tapply(falseca$size,falseca$rumor_id,sum)
+
+mixedru=c()
+mixedru$size=tapply(mixedca$size,mixedca$rumor_id,sum)
+```
+
+Once we recounted the metrics by grouping all the cascades carrying the same rumor as one elements we can then plot the same graph than before
+
+
+```{r,message=FALSE,warning=FALSE}
+par(mfrow=c(1,1),mar=c(5,5,1,1))
+plotCCFD(allru$size,main="rumor size",cex=1,xlab="rumor size")
+pointsCCFD(trueru$size,col="green",cex=1)
+pointsCCFD(falseru$size,col="red",cex=1)
+legend("bottomleft",legend=c("true","false","all"),col=c("green","red","black"),pch=20)
+```
+In this case, the curves of the $CCFD$ looks much more like the curves we observed in the exploration of the model. 
+
+```{r,message=FALSE,warning=FALSE}
+plotCCFD(allru$size,main="rumor size",cex=1,xlab="rumor size")
+othersimulation=randomCascades(t_steps = 90,Nmin = 10000,tau=12)
+pointsCCFD(othersimulation$size,col="grey",cex=1)
+legend("bottomleft",legend=c("data","simulation"),col=c("black","grey"))
+```
+
+# Random Copy Biased toward content of the tweet.
+
+We then propose a slightly modified version of this model with two goals:
+
+1. Keep tracks of the different dimensions (size/depth/breadth) of the cascade of retweets as presented in the dataset
+
+2. Integrate the notion of the _content_ of the tweet that can affect the probability that some will retweet it
+
+We propose the model `?cascades3D` to do so.
+
+## Use of `cascades3D`
+
+### General description
+
+Generally speaking `cascades3D` can be use in a similar way that `randomCascades`. On notable difference is that in order to have all the metrics from \cite{vosoghi2018} we need to keep the whole structure of the tree of retweet. We provide with the function `cascades3D` the possibility to return only the summary of the metrics or the list of all the trees generated during the simulation.
+
+As for `randomCascades`, `cascades3D()` is given with a set of default parameters that allows a quick try:
+
+```{r}
+simu=cascades3D()
+summary(simu)
+```
+
+The default behavior of cacades3D is to return a dataframe where each line represent a cascade generated during the simulation, and each column provide different iformation abnout the cascade:
+
+* __rumor__: id of the rumor associated with the cascade
+
+* __U__:  _utility_ associated with the rumor of the cascade (if it's true or false)
+
+* __ID__:  unique ID representing the cascade, it's buid by the concatenation of the ID of the seed and the rumor involved in this cascade
+
+* __size__: total size of the cascade _ie_ the number of unique agent involved in it
+
+* __depth__:  depth of the cascade _ie_ the longest path between the root to a leaf
+  
+* __breadth__ : maximum number of reweet at the same level  of the cascade.
+
+
+As for the previous model, it's easy to plot the CCFD of the size of each cascades from this table by using the funciton [`plotCCFD()`](../../man/plotCCFD.Rd)
+
+```{r}
+plotCCFD(simu$size,cex=1) 
+```
+
+we can check what happen if we wait more than the default time step
+
+```{r,results='hide',fig.keep='all'}
+longer=cascades3D(time=20)
+plotCCFD(longer$size,col="grey")
+```
+
+One can also compare the result of the simulation to the real cascades observed in the dataset as shown previously.
+
+```{r 3m,fig.cap="compare 3D with data",warning=FALSE}
+data(allca)
+plotCCFD(allca$size,col="red",cex=1)
+pointsCCFD(longer$size,cex=1,col="grey")
+pointsCCFD(simu$size,cex=1)
+legend("bottomleft",legend=c("data","simu","longer simu"),pch=20,col=c("red","black","grey"))
+```
+
+But, we this model, the other metrics can be studied and compared:
+
+```{r all3m,fig.width=1.8*w,warning=FALSE}
+par(mfrow=c(1,3))
+for( m in c("size","depth","breadth")){
+    plotCCFD(allca[,m],col="red",cex=1,main=m)
+    pointsCCFD(longer[,m],cex=1,col="grey")
+    pointsCCFD(simu[,m],cex=1)
+    legend("bottomleft",legend=c("data","simu","longer simu"),pch=20,col=c("red","black","grey"))
+}
+```
+
+### New parameters: $\beta$ and $U$
+Not only this new model wants to reproduce the twitter infrastructure with more accuracy, but we also want to be able to test hyptothesis on how people can be affected by the content of the tweet.
+
+To do so we introduce two new parameter : $\beta$ and $U$
+
+__U__ : is the _utility_ of a tweet, _ie_ a way to qualify its content. 
+__$\beta$__ : is sensibility of the agents toward the content of the tweet.
+
+
+
+Both parameter will interact to determine the probability $p_{a}(i)$ of an agent $a$ to retweet a tweet $i$. this interaction is defined as follow:
+
+$$p_{a}(i)= \frac{e^{ \beta_{a} * U_i}}{\sum^n_j\left(e^{\beta_{a} * U_i}\right)}$$
+
+this function is given by:
+
+```{r}
+probaSelection
+```
+
+__U__ will be distributed between -1 and 1, to allow the representation of a polarised information.
+__$\beta$__ will be distributed between $-\infty$ and $\infty$, represanting the propensity of an agent to retweet eclusively one side or the other of the information spectrum, on to be neutral with regard to the content ( when $\beta=0$)
+
+
+
+
+#### Exploration of the probability function
+
+Let's see how the probability for different agent with different $\beta \in [100,100]$ to selected a tweet $i$ with utility $u_i$, is changing when the number of tweet available increasing . We assume that utility of the tweet available is distributed uniformely between $[-1,1]$.
+
+```{r beta,fig.width=1.5*w,fig.height=1.5*h}
+
+   par(mfrow=c(2,2),mar=c(5,5,1,1))
+   beta=10^seq(-2,2,length.out=50) #generate 50 agents with $\beta \in {-100,-10,0,10,100}$
+   beta=sort(c(sort(-1*beta),0,beta))
+   cols=alpha(topo.colors(length(beta)),.8)
+   names(cols)=beta
+   rac=sapply(seq(5,20,length.out=4),function(n){
+           u=seq(-1,1,length.out=n) #ditribute utility of the _n_ tweet amongs [-1,1]
+           plot(u,probaSelection(u,beta[1]),ylim=c(0,1),type="n",main=paste("Number of tweets=",n),ylab=expression(P[i]),xlab=expression(U[i]))
+           sapply(beta,function(b)lines(u,probaSelection(u,b),lwd=1,col=cols[as.character(b)]))
+           legend("center",legend=c(expression(-10^2),expression(-10^1),0,expression(10^1),expression(10^2)),lwd=3,col=cols[c(1,25,59,75,101)],title=expression(beta))
+})
+
+```
+Given this we can now refine the previous analyses to separate  the metrics given the content (_utility_) of the tweets. The utility is given by the column `U` in the output of the function.
+
+```{r}
+summary(simu$U)
+```
+
+By default the utility is attributed to the initial rumors and distributed between $[0,1]$ as follow `utility = seq(0,1, length.out = 10)`. During the simulation, the cascades will randomly get the utility of the rumor they propagate. At the end, the utility of all cascades should be evenly distributed between $[0,1]$.
+
+```{r,include=F}
+par(defl)
+```
+
+ ```{r}
+hist(simu$U,xlab="U")
+```
+
+To see how the previous metrics and this utility intereact lets just give a color of the cascade:
+
+```{r}
+### generate colors for each utility
+utilities = seq(0,1, length.out = 10) #all possible utility as defined in the default function `cascades3D`
+cols=heat.colors(length(utilities))
+names(cols)=utilities
+ucol_l=cols[as.character(longer$U)]
+ucol_s=cols[as.character(simu$U)]
+```
+
+`ucol_*` are now vectors with a color representing the utility of the cascades, then let's take the previous graph from fig~\ref{fig:all3m}
+
+```{r all3mU,fig.width=1.8*w,fig.height=1*h,warning=FALSE}
+par(mfrow=c(1,3))
+for( m in c("size","depth","breadth")){
+    plotCCFD(allca[,m],,cex=1,main=m)
+    pointsCCFD(longer[,m],cex=1.5,col=ucol_l,pch=17)
+    #pointsCCFD(simu[,m],cex=1.5,col=ucol_s,pch=18)
+    legend("bottomleft",legend=c(paste0("U=",round(utilities,digit=2)),"lon simu","short simu","data"),col=c(cols,1,1,1),pch=c(rep(20,length(utilities)),17,18,20),cex=.8)
+}
+```
+
+The function `getUCols` allows to quickly generate this vector of colors.
+
+
+In the default function the $\beta$ for all the agents is the same and equal to $0$. Which means, as we can see in the graph~\ref{fig:beta} that the utility doesn't affect the way they select the tweet to retweet. Let's then create a polarized population with two kind of $\beta$-person.
+
+```{r,results='hide',fig.keep='all'}
+n=200 #default number of agents in cascades3D
+popbeta=c(rep(0,n/2),rep(100,n/2))
+simu=cascades3D(betadistrib=popbeta,time=20) #we use the longer time step
+```
+
+```{r 3mU2beta,fig.width=1.8*w,warning=FALSE}
+par(mfrow=c(1,3))
+for( m in c("size","depth","breadth")){
+    plotCCFD(allca[,m],cex=1,main=m,xlim=c(1,max(simu[,m],allca[,m])))
+    pointsCCFD(simu[,m],cex=1.5,col=spread::getUCols(simu$U)[order(simu[,m])],pch=20)
+    legend("bottomleft",legend=c(paste0("U=",round(utilities,digit=2)),"data"),col=c(cols,1),pch=c(rep(20,length(utilities)),20),cex=.8)
+}
+```
+
+We can see now that not only the shape of the curve changes dramatically, but know the cascades are cleary sorted given their utility.
+In this case, as the population is split between 0-$\beta$ and 100-$\beta$ agents, the cascades carrying rumor with $U=1$ are the one with the biggest metrics as they are the only on that have a chance to be retweeted by anyone, regardless the $\beta$ of the indivudual, wheras the cascades carrying rumor with $U=0$ will only be retweeted by 0-$\beta$ individuals.
+
+Lets now have a population size split in 3 subpopulation lets generate three kind of rumors where $U\in \{-1,0,1\}$:
+
+```{r,results='hide',fig.keep='all'}
+n=300 #we change the number of agents to easily divide by 3
+popbeta=c(rep(-100,n/3),rep(0,n/3),rep(100,n/3))
+r=30 #number of rumors
+utilities=c(rep(-1,r/3),rep(0,r/3),rep(1,r/3))
+simu=cascades3D(betadistrib=popbeta,N=n,R=r,utility=utilities,time=10) 
+```
+
+```{r 3mU3beta,fig.width=1.8*w,warning=FALSE}
+par(mfrow=c(1,3))
+for( m in c("size","depth","breadth")){
+    plotCCFD(allca[,m],cex=1,main=m,xlab=m)
+    pointsCCFD(simu[,m],cex=1.5,col=getUCols(simu$U),pch=20)
+    legend("bottomleft",legend=c(paste0("U=",round(unique(utilities),digit=2)),"data"),col=c(getUCols(unique(utilities)),1),pch=c(rep(20,length(unique(utilities))),20))
+}
+```
+
+In those simulation the number of cascade is small compared to what appear in  the data set $ncascade_{data}=$`r nrow(allca)` vs $ncascade_{data}=$`r nrow(simu)`, due to the fact that by default no new cascades appears in the simulation. This can be change by setting up the parameter `lambda_c > 0` and setting a bigger number of initial cascades `IC`. To allow cascades to grow bigger, we also need to have more agent able to retweet it. But as the model keep track of all the cascades, allowing all the agents to retweet all the cascades regardless their apparition time, this can take long time and is not realistic. It is the equivalent of saying that at any time people will look at all the tweets that ever happen before retweeting something. To avoid that we set a `captl` parameters that limit the total number of tweet an agent can access to, a `Nmax` parameter that limits the number of agents that retweet at any given time and a `dtime` that defines a number of timestep after which if not retweeted, a cascades cannot be accessed anymore by the agents.
+
+```{r,results='hide',fig.keep='all'}
+n=3000 #we change the number of agents to easily divide by 3
+popbeta=c(rep(-100,n/3),rep(0,n/3),rep(100,n/3))
+r=30 #number of rumors
+simu=cascades3D(betadistrib=popbeta,N=n,R=r,utility=utilities,time=20,lambda_c=.02,IC=1000,captl=.1,dtime=3,Nmax=.1,log=F) 
+```
+
+With more cascade we can now start to see there distribution separatly, as done by Vosoughi et al:
+
+```{r}
+simu.t=simu[simu$U==1,]
+simu.f=simu[simu$U==-1,]
+simu.m=simu[simu$U==0,]
+```
+
+We separate here in three as in the dataset `true`/`false`/`mixed`, though in this case  the utility of the message should be seen more as   different `kind` of message that maybe retweet by different kind of people, regardless the information carried is true or false. 
+
+
+```{r morecascades,fig.width=1.8*w,warning=FALSE}
+par(mfrow=c(1,3))
+for( m in c("size","depth","breadth")){
+plotCCFD(simu[,m],,cex=1,main=m)
+pointsCCFD(simu.t[,m],cex=1.5,col="yellow",pch=20)
+pointsCCFD(simu.f[,m],cex=1.5,col="red",pch=20)
+pointsCCFD(simu.m[,m],cex=1.5,col="orange",pch=20)
+legend("bottomleft",legend=c(paste0("U=",round(unique(utilities),digit=2)),"all"),col=c(getUCols(unique(utilities)),1),pch=c(rep(20,length(unique(utilities))),20))
+}
+```
+
+As one can expect given the equation we provided, when the population is split in equal sub-group, the $-1$ and $1$ utility behave the same way, whereas the message with $0$ utility is left behind. 
+
+
+
+### Analyses of the list of cascades
+Insted of looking only at the summary statistics of the cascades of the simulation, one may be interested to look entire structures of the cascades.
+
+This is possible by setting to `FALSE` the `summary` argument in `cascades3D`. Whem done, instead of returning a `data.frame` the function return a list with 3 elements:
+
+```{r}
+simu=cascades3D(summary = FALSE)
+summary(simu)
+```
+
+* `simu$agents`: number of retweets done by each agents and in `names(simu$agents)` the beta-value for each agents
+
+* `simu$summary`: `data.frame` with information about the cascades col
+
+```{r}
+summary(simu$summary)
+```
+
+    * __U__: the utility of the rumors spreaded by the cascade
+
+    * __seeder__: id of the agent that tweeted first the cascade
+
+    * __rumor__: id of the rumor associated with the cascade
+
+* `simu$cascades` is the list of all cascades created during the simulation
+  each element of this list represent the _edglist_ of a cascades:
+
+```{r}
+simu$cascades[[1]] #show the edglesit of the first cascades generated
+```
+
+```{r,include=F}
+id=sample.int(length(simu$cascades),1) #we select a random cascade
+exedge=simu$cascades[[id]] #show the edglesit of the cascade 
+while(nrow(exedge)<10)
+{#a R chunk just to be sur ethat we will have selected an interesting edgelist
+id=sample.int(length(simu$cascades),1) #we select a random cascade
+exedge=simu$cascades[[id]] #show the edglesit of the cascade 
+}
+```
+
+
+To keep space we avoid as much as possible to give name to the elements generated during the simulation. But let see what is stored in the edgeliste:
+
+```{r,eval=-(1:2)} 
+id=sample.int(length(simu$cascades),1) #we select a random cascade
+exedge=simu$cascades[[id]] #show the edglesit of the cascade 
+colnames(exedge)= c("nodeA","nodeB","timestep")
+print(exedge)
+```
+Each line represent a link between `nodeA` to `nodeB` create a the given `timestep`, the first row correspond to the ID that tweeted first the message that will be propagate by this cascade.
+
+Knowing that we could say in our case: 
+
+  "the agent `r exedge[2,"nodeB"]` retweeted `r exedge[2,"nodeA"]` at the time step `r exedge[2,"timestep"]` in the `r id`th cascade started by agent `r exedge[1,"nodeA"]` ".
+
+As the orden between `simu$cascades` and `simu$summary` is the same, it is easy to get the utility of a given cascade by using its id. On can just check:
+`simu$summary$U[id]` = `r simu$summary$U[id]`
+
+#### Network visualisation:
+The cascades in the list of cascades are represented as edge list. Edge list are a common way to represent networks, and can then easily manipulated by  any program able to work with network (_ie_ [Gephi](https://gephi.org/), [networkx](https://networkx.github.io/),...)
+
+He we will give some example using the R package [IGraph](https://cran.r-project.org/web/packages/igraph/index.html)
+```{r}
+### IGRAPH & Network Visualization 
+par(mfrow=c(1,1),oma=rep(0,4),mar=rep(0,4))
+### Be carefull the the version you are installing is > 1.0 as so changes has been made after the versions < 1.0. One solution is to use the development version using devtools::install <- github("igraph/rigraph")
+library(igraph) 
+
+ig=graph_from_edgelist(exedge[,c(1,2)]) #transform the cascade we picked up into a igraph graph
+# note that graph_from_edgelist doesn't allow to use a third column as the edge lenght,
+plot(ig,layout=layout_as_tree) #Layout take a function as arguement that will take care of how to set up the node of thr graph. Here we want it to be a tree
+```
+If the function `graph_from_edgelist` found integer to designet the node of a edge, it will automatically generate  missing  node and put them as disconnected one node graph. To avoid that we have to change the number as characters. This can be done using the function `formatEdgeList`
+
+```{r}
+### IGRAPH & Network Visualization 
+par(mfrow=c(1,1),oma=rep(0,4),mar=rep(0,4))
+par(mfrow=c(1,1),oma=rep(0,4),mar=rep(0,4))
+igedge = formatEdgeList(exedge)
+ig =  graph_from_edgelist(igedge)
+plot(ig,layout=layout_as_tree,cex=.2)
+```
+
+It is then easy to visually check the metrics for this cascade
+
+```{r}
+measurements = c(
+    getDepth(exedge), #the depth of the cascade  _ie_   the longest path from the root to a leaf
+    getMaxBreadth(exedge), #the bread of the cascade ie the maximum number of node at a same unique level of the tree
+    nrow(exedge)  #the size of the cascade _ie_ the total number of node in the tree
+)
+names(measurements)=c("depth","breadth","size")
+measurements
+```
+
+We can then easily print all the network of all cascades of a simulation, and color it given the value of U.
+```{r, fig.width=1.5*w,fig.height=1.5*h}
+### visualize all cascades and utility
+par(mfrow=c(1,1),oma=rep(0,4),mar=rep(0,4))
+ca=simu$cascades[1:9] #only the 9 first cascades 
+cid=simu$summary[1:9,]
+cclrs=getUCols(cid$U)
+allsubgraph=lapply(1:length(ca),function(j)graph_from_edgelist(formatEdgeList(ca[[j]],j)))
+par(mfrow=c(3,3),mar=c(0,0,0,0),oma=c(0,0,0,0))
+nada=lapply(order(cid$U),function(g){plot(allsubgraph[[g]],layout=layout_as_tree,vertex.color=cclrs[as.character(cid$U[g])],vertex.label=NA);box()})
+```
+Or follow the evolution of the network of one (or all) cascade(s).
+
+![giftree](../../doc/images/giftree.gif)
+
+
+```{r testb,fig.width=1.5*w,fig.height=1.5*h,fig.show='animate', interval=.1,eval=F}
+#this should generate a video but doesn't work
+maxround=max(sapply(ca,function(ic)max(ic[,3])))
+for(t in seq(1,maxround,length.out=100)){
+    tmp=lapply(ca,function(cc)if(length(cc[cc[,3]<t,])==0)  null  else cc[cc[,3]<t,]) 
+    allsubgraph=lapply(1:length(tmp),function(j)graph_from_edgelist(formatEdgeList(tmp[[j]],j)))
+    par(mfrow=c(3,3),mar=c(0,0,0,0),oma=c(0,0,0,0))
+    for(g in order(cid$U)){
+        plot(allsubgraph[[g]],layout=layout_as_tree,vertex.color=cclrs[as.character(cid$U[g])],vertex.label=NA,vertex.size=1,edge.width=.5,edge.arrow.size=.5,edge.arrow.width=.2)
+        box()
+    }
+}
+```
+
+```{r,eval=F,include=F,echo=F,messages=F,warning=F}
+
+#as the previous doesn't work I generate the gif in hard 
+maxround=max(sapply(ca,function(ic)max(ic[,3])))
+i=0
+for(t in seq(1,maxround,length.out=100)){
+    tmp=lapply(ca,function(cc)if(length(cc[cc[,3]<t,])==0)  null  else cc[cc[,3]<t,]) 
+    allsubgraph=lapply(1:length(tmp),function(j)graph_from_edgelist(formatEdgeList(tmp[[j]],j)))
+    png(file.path("gifmaking",sprintf("%03d_cascades.png",i)))
+    par(mfrow=c(3,3),mar=c(0,0,0,0),oma=c(0,0,0,0))
+    for(g in order(cid$U)){
+        plot(allsubgraph[[g]],layout=layout_as_tree,vertex.color=cclrs[as.character(cid$U[g])],vertex.label=NA,vertex.size=15,edge.width=1,edge.arrow.size=.8,edge.arrow.width=.5)
+        box()
+    }
+    dev.off()
+    i=i+1
+}
+```
+
+
+```{r, include = FALSE}
+par(defl)
+wtr <- par()
+```
+## Exploration of the model 
+
+One can explore more in depth the model. For example the impact of mu on the CCFD given the length of the simulations 
+
+```{r,fig.width=w*2, fig.height=h*2,messages=F,results='hide',fig.keep='all'}
+mu=10^seq(-2,0,length.out=10) #a sequence of 20 different mu logarithmically spaced from 10^-5 to 10^-1
+step=seq(1,10,length.out=4) #a sequence of different number of step
+cols=heat.colors(length(mu)) #creat colors for each mu
+par(mfrow=c(2,2),mar=c(5,5,3,1))
+for(s in step){  
+    plotCCFD(1,1,type="n",ylim=c(0.01,100),xlim=c(1,10000),main=paste("time=",round(s)))
+    sapply(1:length(mu),function(i)
+           {
+               pointsCCFD(cascades3D(time=s,N=1000,Nmax=.2,R=50,IC=10,utility=runif(50,-1,1),betadistrib=rep(0,1000),lambda_c=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
+           }
+    )
+}
+```
+
+or the number of agents
+
+```{r,fig.width=w*2, fig.height=h*2}
+par(mfrow=c(2,2))
+nagent=c(100,200,300) #a sequence of different number of step
+#for(n in nagent){
+#    plotCCFD(1,1,type="n",ylim=c(0.0001,100),xlim=c(1,100000),main=paste("Num of Agents=",n))
+#    sapply(1:length(mu),function(i)
+#           {
+#               pointsCCFD(cascades3D(N=n,Nmax=.2,R=50,IC=10,utility=runif(50,-1,1),betadistrib=rep(0,n),time=s,lambda_c=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
+#           }
+#    )
+#}
+```
+
+
+## Comparison with dataset
+
+
+#Approximate Bayesian Computation
+
+To save space the use of Baeysian Computation is describe in another vignette [here](abc_spread.html)
+

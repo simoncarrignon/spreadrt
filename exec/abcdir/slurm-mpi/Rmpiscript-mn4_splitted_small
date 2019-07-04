@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=mpitwitterdebu
+#SBATCH --output=twitter_%j.out
+#SBATCH --error=twitter_%j.err
+#SBATCH --ntasks=240
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:30:00
+
+## args 1 2 3 4 5 : 1 the destination where to take the parameter (input) 
+#2 => folder where to write the result
+#3 duration categorie
+#4 number of cpu asked
+#5 lengh (00:30:00 if small,02:00:00 if large)
+
+start=`date +%s` #record the time to log the total execution time
+
+module load impi
+module load R/3.4.0
+
+mpirun -n 1 Rscript readParameters.R $1 $2 $3 239
+
+end=`date +%s`
+
+runtime=$((end-start))
+
+echo "total time: $runtime"
