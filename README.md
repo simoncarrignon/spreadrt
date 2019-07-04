@@ -12,8 +12,8 @@ git clone https://github.com/simoncarrignon/spreadrt.git
 
 and install from source:
 ```R
-install.packages("spread",repos=NULL,type="source")
-library(spread)
+install.packages("spreadrt",repos=NULL,type="source")
+library(spreadrt)
 ```
 
 Or you can use `install_github` function from package `devtools`:
@@ -37,7 +37,7 @@ Once it's done (it can take some time as it as to run some simulations and gener
 
 
 ## Modify the package
-If you plan to modify the package and want to check your modifications you need to start `R` from the folder `spread/` and use the packages `devtools` and `roxygen2`
+If you plan to modify the package and want to check your modifications you need to start `R` from the git folder and use the packages `devtools` and `roxygen2`
 ```R
 library(devtools)
 library(roxygen2)

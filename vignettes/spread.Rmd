@@ -1,6 +1,6 @@
 ---
 title: "Modeling the spread of news on Twitter"
-author: "Simon Carrignon , Alex Bentley, Michael Gilchrist, Damian Ruck"
+author: "Simon Carrignon , Alex Bentley, Damian Ruck"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -21,7 +21,7 @@ is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
 knitr::opts_chunk$set(fig.height=h,fig.width=w,fig.align = "center", eval = !is_check)
 knitr::opts_knit$set(global.par = TRUE) 
-library(spread)
+library(spreadrt)
 ```
 
 ```{r, include = FALSE}
@@ -42,12 +42,12 @@ To illustrate that, we used a model developed by Ruck et al. (2017) to explore c
 We show here that this model can reproduce most of the properties observed by Vosoughi et al (2018). Moreover, and given the availability of the data used in the original paper, we applied Approximate Bayesian Computation to find what mixture of sensibilities among the actual social media actors has the highest probability to reproduce the difference observed.
 
 
-## Installing the *spread* package
+## Installing the *spreadrt* package
 
-Stable versions of the *spread* package should be, at some point, directly installed from CRAN (using the command `install.packages("nameofthepackage")`), whilst the development version can be installed from the [github repository](https://github.com/simoncarrignon/spread) using the following command (the function requires the *devtools* package):
+Stable versions of the *spreadrt* package should be, at some point, directly installed from CRAN (using the command `install.packages("nameofthepackage")`), whilst the development version can be installed from the [github repository](https://github.com/simoncarrignon/spread) using the following command (the function requires the *devtools* package):
 
 ```{r,eval=FALSE}
-devtools::install_github("simoncarrignon/twitter-spread")
+devtools::install_github("simoncarrignon/spreadrt")
 ```
 
 Notice that so far it's,  and still will be for a long, _only_ a  development version. There is not even yet a master branch to the git. 

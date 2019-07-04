@@ -1,6 +1,6 @@
 ---
 title: "Modeling the spread of news on Twitter/ Approximate Bayesian Computation"
-author: "Simon Carrignon , Alex Bentley, Michael Gilchrist, Damian Ruck"
+author: "Simon Carrignon , Alex Bentley, Damian Ruck"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -21,7 +21,7 @@ is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
 knitr::opts_chunk$set(fig.height=h,fig.width=w,fig.align = "center", eval = !is_check)
 knitr::opts_knit$set(global.par = TRUE) 
-library(spread)
+library(spreadrt)
 ```
 
 ```{r, include = FALSE}
@@ -700,8 +700,8 @@ scores.ext=lapply(1:nsim,function(i,parameters,obs){
     return(list(kc=kc,qc=qc,invkc=invkc,rd=simres))
 
 },obs=allca,parameters=parameters)
-save(file="spread/data/scores.ext.3D.rda",scores.ext)
-build_vignettes("spread/")
+save(file="data/scores.ext.3D.rda",scores.ext)
+build_vignettes(".")
 ```
 
 In `scores.ext` we keep the full result of the simulation _ie_ not only the score but the full distribution of size.
