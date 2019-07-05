@@ -27,11 +27,19 @@ getMaxBreadth <- function(cascade){
     }
 
 }
-
 #' getDepth: 
 #' Gives the depth of a tree
 #' @param cascade: a edgelist that represent a cascade
 #' @return integer 
+#' @export getDepth 
+getDepth <- function(cascade){
+    if(nrow(cascade)==1)
+        return(1)
+    if(is.null(dim(cascade[-1,])))
+        return(2)
+    max(unlist(depths(cascade[-1,],cascade[1,1])))
+}
+
 getDepth <- function(cascade){
     if(nrow(cascade)==1)
         return(1)
@@ -46,6 +54,7 @@ getDepth <- function(cascade){
 #' @param cascade: a edgelist that represent a cascade
 #' @param root: the id of the root node
 #' @return list of depth of each branch
+#' @export depths 
 depths <- function(cascade,root){
     childs=cascade[cascade[,1] == root,2]
     if(length(childs)==0)
@@ -59,6 +68,7 @@ depths <- function(cascade,root){
 #' distance between the frequencies of a and b, the frequencies beings calculates for logarithmics categories
 #'@param a and b: sample of any size 
 #'@return a list of dist
+#' @export euclidediff 
 euclidediff <- function(a,b,nbin=20) {
     m=max(a,b)
     pm=round(log10(m))+1

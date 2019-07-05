@@ -5,6 +5,9 @@
 #' @param utility : intrinsic utility of the message
 #' @param repetition : number of time that the agents will check their timeline 
 #' @param M : number of messageG
+#'
+#' @export simplemodel 
+
 
 simplemodel <- function(agents=2:200,K=10,betadistrib=runif(0,1),jdistrib=runif(0,1),utility=runif(1),repetition=10,M=5,seed){
 
@@ -55,6 +58,8 @@ simplemodel <- function(agents=2:200,K=10,betadistrib=runif(0,1),jdistrib=runif(
 #' @param utility : vector of size M, the distribution of intrinsic utility for each messages
 #' @param repetition : number of time that the agents will check their timeline 
 #' @return a list with information on each messages  
+#'
+#' @export cascades 
 
 cascades <- function(N=200,K=10,M=5,betadistrib=runif(200,0,1),jdistrib=runif(200,0,1),utility=seq(0,1,length.out=5),repetition=2,seed=100,tl=500){
 

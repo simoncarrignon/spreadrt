@@ -18,6 +18,7 @@
 #' @name allca
 #' @usage data(allca)
 #' @format A data frame with 126301 rows and 7 variables
+#' @export allca 
 NULL
 
 
@@ -30,6 +31,7 @@ NULL
 #' @name trueca
 #' @usage data(trueca)
 #' @seealso \code{\link{allca}}
+#' @export trueca 
 NULL
 
 
@@ -42,6 +44,7 @@ NULL
 #' @name mixedca
 #' @usage data(mixedca)
 #' @seealso \code{\link{allca}}
+#' @export mixedca 
 NULL
 
 #' False Cascades from Vosoughi et al
@@ -53,5 +56,6 @@ NULL
 #' @name falseca
 #' @usage data(falseca)
 #' @seealso \code{\link{allca}}
+#' @export falseca
 NULL
 

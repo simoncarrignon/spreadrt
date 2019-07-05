@@ -3,6 +3,8 @@
 #' @param cascade a cascade
 #' @param i an integer to identify the cascade, 0 if nothing is given
 #' @return an edgelist formated to be read by `graph_from_edgelist`
+#'
+#' @export formatEdgeList 
 formatEdgeList <- function(cascade,i=0){
     if(is.null(dim(cascade)))
         t(paste0("c",i,"-",cascade[1:2]))

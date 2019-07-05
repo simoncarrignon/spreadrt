@@ -6,6 +6,8 @@
 #'@param metrics the ids of the metrics use for the score
 #'@param log if true, show the name of the folder scanned
 #'@return a list of list of list
+#'
+#' @export getAllscores 
 getAllscores <- function(mainfold,idscores=c("kc","kokc","qc","kcrev","kokcrev"),metrics=c("depth","breadth","size"),log=T,lim=NULL){
     #With all the folder we can now get all the scores
     if(is.character(lim))
@@ -49,6 +51,8 @@ getAllscores <- function(mainfold,idscores=c("kc","kokc","qc","kcrev","kokcrev")
 }
 
 ##This function is a hack when dimension of metrics and idscores == 1, that SHOULD be included in previous function as a test case
+#'
+#' @export getAllscoresB 
 getAllscoresB <- function(mainfold,idscores=c("kc","kokc","qc","kcrev","kokcrev"),metrics=c("depth","breadth","size"),log=T,lim=NULL){
     #With all the folder we can now get all the scores
     if(is.character(lim))
@@ -79,6 +83,8 @@ getAllscoresB <- function(mainfold,idscores=c("kc","kokc","qc","kcrev","kokcrev"
 #'@param check if check is true then when check if all parameters led to good simulation (ie number of parameters -== number of score)
 #' note that with check use of checkIfNumberGood should be useless
 #'@return a dataframe with all parameters
+#'
+#' @export getAllparameters 
 getAllparameters <- function(mainfold,log=F,lim=NULL,check=T){
     if(is.character(lim))
         allfolders=lim
@@ -103,6 +109,8 @@ getAllparameters <- function(mainfold,log=F,lim=NULL,check=T){
     return(allparameters.dataframe)
 }
 
+
+#' @export getlistfoldsubfold 
 getlistfoldsubfold <- function(mainfold,lim){
     allfolders= list.dirs(mainfold,recursive=F)
     if(!is.null(lim))allfolders=paste0(file.path(mainfold,basename(mainfold)),lim)
@@ -115,6 +123,8 @@ getlistfoldsubfold <- function(mainfold,lim){
 #'@param allparameters.dataframe a dataframe with all parameters
 #'@param n an integer
 #'@return a list of list, with for each score and each metrics a dataframe with subset of the parameter for with score of the simulation is in top `n`
+#'
+#' @export getAllposteriors 
 getAllposteriors <- function(allscores,allparameters.dataframe,n=500)
     lapply(allscores,lapply,function(u)allparameters.dataframe[rank(u,ties="first")<n,])
 
@@ -124,12 +134,16 @@ getAllposteriors <- function(allscores,allparameters.dataframe,n=500)
 #'@param s id of the function use to compute the score
 #'@param m metric use to compute the score
 #'@return the list of parameter that gave the best score
+#'
+#' @export getbest 
 getbest <- function(allscores,allparameters.dataframe,s,m)
     unlist(allparameters.dataframe[which(rank(allscores[[s]][[m]],ties="first") == 1),])
 
 #' Wrapper for Cascades3D that automatically convert a list of arguments 
 #'@param listofparameters a list of parameters normally given to cascades3D
 #'@return same as cascades3D
+#'
+#' @export cascades3D.list 
 cascades3D.list <- function(listofparameters,metrics=c("size","depth","breadth")){
     if(length(listofparameters)==9)
         cascades3D(
@@ -173,6 +187,8 @@ cascades3D.list <- function(listofparameters,metrics=c("size","depth","breadth")
 #' Wrapper for random cascade 
 #'@param listofparameters a list of parameters normally given to cascades3D
 #'@return same as randomCascades
+#'
+#' @export randomCascades.list 
 randomCascades.list <- function(listofparameters,...){
     z=list(...)
     alberto=NULL
@@ -228,6 +244,8 @@ randomCascades.list <- function(listofparameters,...){
 #'@param expefold folder within which we have to look
 #'@param full boolean saying is the full simulation need to be retrieves
 #'@return a list with the score and the list of parameters
+#'
+#' @export getSimuGivenIndices 
 getSimuGivenIndices <- function(ind,expefold,full=F){
     i=1
     totest=0:(length(list.files("../testRumorSize/"))-1)
@@ -254,6 +272,8 @@ getSimuGivenIndices <- function(ind,expefold,full=F){
 #' allow to be sure that parameters and scores read from the folders make sense.
 #' @param numberparam number of parameter that will be tested
 #' @param rep number of time the parameter set will be repeted
+#'
+#' @export fromTestScoresVSParam 
 fromTestScoresVSParam <- function(theparam,thescores,numberparam=20,repet=10,modelwrapper=cascades3D.list,data=allru$size,scorefun=quantilediff,rumor=F){
     stopifnot(length(thescores)== nrow(theparam))
     allsample=lapply(sample(length(thescores),numberparam),function(j)
@@ -287,6 +307,8 @@ fromTestScoresVSParam <- function(theparam,thescores,numberparam=20,repet=10,mod
 #' Same before but just return list of the simulation rerun 
 #' @param numberparam number of parameter that will be tested
 #' @param rep number of time the parameter set will be repeted
+#'
+#' @export reruns 
 reruns <- function(theposterior,thescores=NULL,samplepost=100,repet=10,modelwrapper=cascades3D.list,data=allru$size,scorefun=quantilediff,rumor=F,type="all",log=F,...){
     ##To set the color scale I use the trick of calcualting all the simulation first and then attribue the color. Ungly so far.
     print(samplepost)
@@ -328,12 +350,15 @@ reruns <- function(theposterior,thescores=NULL,samplepost=100,repet=10,modelwrap
     return(replpost)
 }
 
+
 #' Same before but print distribution function that helps to run test to check if score correspond do parameters.
 #' and then
 #' @param numberparam number of parameter that will be tested
 #' @param rep number of time the parameter set will be repeted
 #' @param clrs if "score" the curves are colored givent the score function used 
 #' @param ... parameters transmitted to plot
+#'
+#' @export plotPosteriorsCheck 
 plotPosteriorsCheck <- function(theposterior,thescores,samplepost=100,repet=10,modelwrapper=cascades3D.list,data=allru$size,scorefun=quantilediff,rumor=F,type="all",clrs="score",alberto=F,...){
 
     reruns(theposterior,thescores,samplepost=100,repet=10,modelwrapper=modelwrapper,data=allru$size,scorefun=quantilediff,rumor=F,type="all",clrs="score",alberto=alberto)
@@ -359,6 +384,8 @@ plotPosteriorsCheck <- function(theposterior,thescores,samplepost=100,repet=10,m
   
 #' Take a folder name and return the list of id of the folders that have exact same number of parameters and scores
 #' @param folder the name of a folder as the one used in getlistfoldsubfold
+#'
+#' @export checkIfNumberGood 
 checkIfNumberGood <- function(folder,inv=T){
     alllength=lapply(getlistfoldsubfold(folder,lim=NULL),function(i){tryCatch({load(file.path(i,"parameters.bin"));load(file.path(i,"scores.bin"));c(i,length(parameters[[1]]),length(scores))},error=function(e)c(i,0,-1))})
     if(inv)return(unlist(lapply(1:length(alllength),function(i){s=alllength[[i]];if(s[2]==s[3])s[1]})))

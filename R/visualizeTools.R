@@ -1,11 +1,13 @@
 #' alpha
 #'
 #' my own implementation to add alpha to colors
+#' @export alpha 
 alpha <- function(color,alpha){
     rgb(t(col2rgb(color)/255),alpha=alpha)
 }
 
 
+#' @export getCCFD 
 getCCFD <- function(){
     load("hundreds.bin")
 
@@ -54,6 +56,7 @@ pointsCCFD_U <- function(s,pch=20,cex=2,col=NULL,lenged=TRUE,...){
 #'@param s : sample of sizes
 #'@param ... : parameters passed to plot
 #'@return nothing
+#' @export plotCCFD 
 plotCCFD <- function(s,pch=20,cex=1,xlab="",ylab="CCDF(%)",...){
     ccfd=ccfd(s)
     plot(ccfd[,"x"],ccfd[,"y"],log="xy",,pch=pch,ylab=ylab,cex=cex,xlab=xlab,...)
@@ -63,6 +66,7 @@ plotCCFD <- function(s,pch=20,cex=1,xlab="",ylab="CCDF(%)",...){
 #'@param s : sample of sizes
 #'@param ... : parameters passed to plot
 #'@return nothing
+#' @export pointsCCFD 
 pointsCCFD <- function(s,pch=20,cex=1,...){
     ccfd=ccfd(s)
     points(ccfd[,"x"],ccfd[,"y"],pch=pch,cex=cex,...)
@@ -73,6 +77,7 @@ pointsCCFD <- function(s,pch=20,cex=1,...){
 #' Calculate the CCFD following \emph{Vosoughi et al. (2018)}
 #'@param size : sample of sizes
 #'@return a order table with two column with first column : frequency and second column the probality of the frequency  
+#' @export ccfd 
 ccfd <- function(size){
     total=length(size) 
     size=size[order(size)]
@@ -102,6 +107,7 @@ getUCols <- function(utilities){
 #'@param A : a vector with posterior
 #'@param B : a vector with posterior 
 #'@param prior : a vector with posterior 
+#' @export plot2dens 
 plot2dens <- function(A=NULL,B=NULL,C=NULL,from=NULL,to=NULL,prior=NULL,cols=c(alpha("red",.8),alpha("blue",.8),alpha("yellow",.8)),hdr=F,yaxt=NULL,...){
 
     denseP=NULL

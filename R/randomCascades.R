@@ -1,6 +1,7 @@
 #' randomCascades: A slightly (almost not) modified version of the original model by Alex & Damien
 #' Original model is in tools/FNM.R
 #' @return dataframe that allow to compare easily to the result of the model of the cascade
+#' @export randomCascades 
 randomCascades <- function(Nmin=100000,Nmax=50000,t_steps=50,y_max=1,runs=1,mu=0.00001,tau = 1,alpha=0,conformity=F,beta=-2,topfive=F,TF=5,C=.1,alberto=F){
 
     t<-seq(1,t_steps)
@@ -76,6 +77,7 @@ randomCascades <- function(Nmin=100000,Nmax=50000,t_steps=50,y_max=1,runs=1,mu=0
     df
 }
 
+#' @export conformityBias 
 conformityBias <- function(pop,beta) {
   
     #frequency Pk of each trait
@@ -103,6 +105,7 @@ conformityBias <- function(pop,beta) {
   return(probs)
 }
 
+#' @export originalTopfive 
 originalTopfive <- function(pop,TF,C,rnd,mu,base){
         #the most popular traits in the population
     old_pop=pop
@@ -127,6 +130,8 @@ originalTopfive <- function(pop,TF,C,rnd,mu,base){
 }
 
 
+
+#' @export topfive 
 topfive <- function(pop,TF,C){ 
 
     tpop= table(pop)
