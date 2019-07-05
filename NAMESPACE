@@ -3,6 +3,7 @@
 export(allca)
 export(alpha)
 export(cascades)
+export(cascades3D)
 export(cascades3D.list)
 export(ccfd)
 export(checkIfNumberGood)
