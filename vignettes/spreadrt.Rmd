@@ -35,7 +35,7 @@ devtools::load_all()
 ```
 # Abstract
 
-A recent study by Vosoughi et al. (2018) revealed that the spread of news in online social media exhibit different statistical properties given the veracity of the news. They showed, using various metrics made on the cascade of transmission of information, that false news travel farther and faster than true ones, thus suggesting that the intrinsic value of the information shared on social media may impact the way this information travel. The goal of our current paper is to develop a model to test and compare hypothesis to explain the processes behind these differences. More precisely, we think that different level of sensibilities among the people participating in those cascades is an important factor explaining the difference observed by Vosoughi et al.
+A recent study by Vosoughi et al. (2018) revealed that the spread of news in online social media exhibit different statistical properties given the veracity of the news. They showed, using various metrics made on the cascade of transmission of information, that false news travel farther and faster than true ones, suggesting that the intrinsic value of the information shared on social media may impact the way this information travel. The goal of the tools developed in this package is to test and compare hypothesis to explain the processes behind these differences. More precisely, we think that different level of sensibilities among the people participating in those cascades is an important factor explaining the difference observed by Vosoughi et al. and we aim at modeling them.
 
 To illustrate that, we used a model developed by Ruck et al. (2017) to explore changes in the popularity of words in the English vocabulary. We added to this model the possibility for the agents to recognize the content of the information and a sensibility toward this information. Thus, an agent can be actively willing to share only one kind of information, or they can be neutral toward it, and share equally any kind of information. Then, the probability of an agent to share one kind of information will depend on 1/ the sensibility of the agent toward this kind of information and 2/ the distribution of the other kind of information the agent has access to.
 
@@ -44,18 +44,18 @@ We show here that this model can reproduce most of the properties observed by Vo
 
 ## Installing the *spreadrt* package
 
-Stable versions of the *spreadrt* package should be, at some point, directly installed from CRAN (using the command `install.packages("nameofthepackage")`), whilst the development version can be installed from the [github repository](https://github.com/simoncarrignon/spread) using the following command (the function requires the *devtools* package):
+Stable versions of the *spreadrt* package should be, at some point, directly installed from CRAN (using the command `install.packages("nameofthepackage")`), whilst the development version can be installed from the [github repository](https://github.com/simoncarrignon/spreadrt) using the following command (the function requires the *devtools* package):
 
 ```{r,eval=FALSE}
 devtools::install_github("simoncarrignon/spreadrt")
 ```
 
-Notice that so far it's,  and still will be for a long, _only_ a  development version. There is not even yet a master branch to the git. 
+Notice that so far this package is,  and will long remains, a development version _only_. 
 
 # Exploration of the original dataset
 
 ## Reproduction of result from Vosoughi _et al._ (2018)
-Given the dataset available in `data(allca)`, we can reproduce the key elements presented by Vosoughi et al. 2018.
+Given the dataset available in `data(allca)`, we can reproduce the key elements presented by Vosoughi et al. (2018).
 
 ```{r real-data,fig.cap="reproduction of Vosoughi results.",fig.width=1.8*h,message=FALSE,warning=FALSE}
 par(mfrow=c(1,3),mar=c(5,5,2,1))
@@ -77,8 +77,7 @@ plot(allca$size ~ allca$breadth,log="xy",ylab="cascades size",xlab="cascade brea
 plot(allca$size ~ allca$depth,log="xy",ylab="cascades size",xlab="cascade depth")
 plot(allca$depth ~ allca$breadth,log="xy",ylab="cascades depth",xlab="cascade breadth")
 ```
-We can clearly see that the main driver of the size of the cascades is the breadth, _ie_ the number of simultaneous retweets.
-
+We can clearly see that the main driver of the size of the cascades is its breadth, _ie_ the number of simultaneous retweets.
 
 
 ## Rate of apparition
@@ -678,5 +677,5 @@ nagent=c(100,200,300) #a sequence of different number of step
 
 #Approximate Bayesian Computation
 
-To save space the use of Baeysian Computation is describe in another vignette [here](abc_spread.html)
+To save space the use of Baeysian Computation is describe in another vignette [here](abc_spreadrt.html)
 
