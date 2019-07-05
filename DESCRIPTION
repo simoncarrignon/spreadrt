@@ -1,7 +1,7 @@
 Package: spreadrt
 Title: Model of Twitter Retweet Cascade Spread
 Version: 0.0.0.9000
-Authors@R: person("Simon", "Carrignon", email = "simon@gmail.com", role = c("aut", "cre"))
+Authors@R: person("Simon", "Carrignon", email = "simon.carrignon@gmail.com", role = c("aut", "cre"))
 Description: give model and tools used for the paper Carrignon et al. 2019
 Depends: R (>= 3.3.3)
 License: GPL
