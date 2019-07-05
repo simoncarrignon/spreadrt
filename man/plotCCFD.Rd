@@ -4,7 +4,7 @@
 \alias{plotCCFD}
 \title{plot the CCFD following \emph{Vosoughi et al. (2018)} on a log-log axis}
 \usage{
-plotCCFD(s, pch = 20, cex = 1, xlab = "", ...)
+plotCCFD(s, pch = 20, cex = 1, xlab = "", ylab = "CCDF(\%)", ...)
 }
 \arguments{
 \item{s}{: sample of sizes}

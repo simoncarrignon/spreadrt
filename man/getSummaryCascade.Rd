@@ -4,13 +4,13 @@
 \alias{getSummaryCascade}
 \title{getSummaryCascade: from a list of cascade, return a list with the size, depth and max breadth of each cascades}
 \usage{
-getSummaryCascade(cascade)
+getSummaryCascade(cascade, metrics = c("size", "depth", "breadth"))
 }
 \arguments{
 \item{cascade}{: a list of cascades}
 }
 \value{
-a  table with three column ("size","depth","breadth") and a number of row equal to the length of the input list
+a  table with the column define in metrics, ("size","depth","breadth") by default, and a number of row equal to the length of the input list
 }
 \description{
 getSummaryCascade: from a list of cascade, return a list with the size, depth and max breadth of each cascades

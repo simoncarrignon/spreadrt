@@ -4,10 +4,11 @@
 \alias{cascades3D}
 \title{Spread of cascades of retweet}
 \usage{
-cascades3D(N = 200, R = 10, betadistrib = rep(1, 200), utility = seq(0,
-  1, length.out = 10), time = 2, captl = -1, IC = 50, summary = T,
-  Nmax = NULL, lambda_c = 0, lambda_r = 0, dtime = 0, stime = -1,
-  memory = T, log = T)
+cascades3D(N = 200, R = 10, betadistrib = rep(1, 200),
+  utility = seq(0, 1, length.out = 10), time = 2, captl = -1,
+  IC = 50, summary = T, Nmax = NULL, mu_c = 0, mu_r = 0,
+  dtime = 0, stime = -1, memory = T, log = T, metrics = c("size",
+  "depth", "breadth"), debug = F)
 }
 \arguments{
 \item{N}{total number of agents}
@@ -20,7 +21,7 @@ cascades3D(N = 200, R = 10, betadistrib = rep(1, 200), utility = seq(0,
 
 \item{time}{number of time that the agents will check their timeline  (length of the simulation)}
 
-\item{captl}{maximum messages that agents can acess to}
+\item{captl}{maximum number of messages that agents can acess to}
 
 \item{IC}{initial number of cascades}
 
@@ -28,13 +29,15 @@ cascades3D(N = 200, R = 10, betadistrib = rep(1, 200), utility = seq(0,
 
 \item{Nmax}{if NULL or Nmax == 1, N agents will have the opportunity to retweet at each time step, ifNmax > 1, Nmax randomly sampled agent will have the possibility to retweet, if Nmax < 1, Nmax represnet the proportion of agents that will be able to retweet}
 
-\item{lambda_c}{rate of apparition of new cascades}
+\item{mu_c}{rate of apparition of new cascades}
 
-\item{lambda_r}{rate of apparition of new rumors}
+\item{mu_r}{rate of apparition of new rumors}
 
 \item{dtime}{maximum number of timestep during which a cascades can survives. if =< 0 cascades are kept during all the simulation.}
 
 \item{stime}{the oldest tweet (in timestep) that an agent can access from an active cascade (if stime = 1 the agents can only access retweet or tweet done during the previous time step. If -1 there is no limit.}
+
+\item{memory}{if TRUE agents cannot participate to the same cascades twice (ie retweet twice the same tweet). Real way twitter is working.}
 
 \item{log}{print the time step and some information if TRUE, nothing if FALSE}
 }

@@ -5,8 +5,8 @@
 \title{Simplemodel with only one message being retweeted}
 \usage{
 simplemodel(agents = 2:200, K = 10, betadistrib = runif(0, 1),
-  jdistrib = runif(0, 1), utility = runif(1), repetition = 10, M = 5,
-  seed)
+  jdistrib = runif(0, 1), utility = runif(1), repetition = 10,
+  M = 5, seed)
 }
 \arguments{
 \item{K}{: max number of neighbours}
