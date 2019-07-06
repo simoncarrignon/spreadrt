@@ -1,25 +1,23 @@
 # Twitter Spread R-package
 
-R-package with the code used for the paper: _Modelling rapid online cultural transmission: Evaluating neutral models on Twitter data with Approximate Bayesian Computation_ in _Palgrave Communication_ special issue on Cultural Evolution.   
+R-package with the code used for the paper: _Modelling rapid online cultural transmission: Evaluating neutral models on Twitter data with Approximate Bayesian Computation_ in _Palgrave Communication_ special issue on Cultural Evolution. Vignettes are availalbe online:
+- [spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/spreadrt.html)
+- [abc_spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/abc_spreadrt.html)
 
 ## Install the package
 
 To install the 'spreadrt' package directly from this git repository you can:
-
 Clone the repository 
 
 ```bash
 git clone https://github.com/simoncarrignon/spreadrt.git
 ```
-
 and install from source:
 ```R
 install.packages("spreadrt",repos=NULL,type="source")
 library(spreadrt)
 ```
-
 Or you can use `install_github` function from package `devtools`:
-
 ```R
 library(devtools)
 devtools::install_github("simoncarrignon/spreadrt")
@@ -40,7 +38,7 @@ __warning__: Building the vignettes takes time (more than 30 minutes) as it has 
 
 Once it's done, you can open the resulting html files that should have been created in `inst/doc/` at the follwing URLs: [spreadrt.html](inst/doc/spreadrt.html) and  [abc_spreadrt.html](inst/doc/abc_spreadrt.html).
 
-Compiled version of the vignettes are available on the pages branch of the github: 
+A simpler and more straightforward way is to go to the compiled version of the vignettes in the pages branch of the github: 
 - [spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/spreadrt.html)
 - [abc_spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/abc_spreadrt.html)
 
@@ -60,4 +58,4 @@ then if you modify some code within the package you can use:
 
 Some of the scripts used to run the ABC have been stored in `exec/abcdir` as well as some script used to generate the plot of the paper in `exec/palcomm`. Though those script are very hardware and problem specific they could be of some use (for people using SLURM and MPI mainly). 
 
-__TODO__: Part of those script should be integrated in functions and vignette in the main package.
+__TODO__: Part of script and comment in `exec` should be integrated in functions and vignette in the main package.
