@@ -35,11 +35,14 @@ and the function:
 build_vignettes()
 ```
 
-__warning__: Building the vignettes takes time (more than 30 minutes) as it as to run bunch of simulations and generate graphs.
+__warning__: Building the vignettes takes time (more than 30 minutes) as it has to run a great number of simulations and generate numerous graphs.
 
 
-Once it's done , you can then then open the html results file that should have been created in `inst/doc/` at the follwing URLs: [spreadrt.html](inst/doc/spreadrt.html) and  [abc_spreadrt.html](inst/doc/abc_spread.html).
+Once it's done, you can open the resulting html files that should have been created in `inst/doc/` at the follwing URLs: [spreadrt.html](inst/doc/spreadrt.html) and  [abc_spreadrt.html](inst/doc/abc_spreadrt.html).
 
+Compiled version of the vignettes are available on the pages branch of the github: 
+- [spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/spreadrt.html)
+- [abc_spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/abc_spreadrt.html)
 
 ## Modify the package
 If you plan to modify the package and want to check your modifications you need to start `R` from the git folder and use the packages `devtools` and `roxygen2`
