@@ -24,7 +24,6 @@
 #' par(mfrow=c(1,2))
 #' plotCCFD(simplerun$size,main="Cascade Size")
 #' plotCCFD(simplerun$depth,main="Cascade Depth")
-#'
 #' @export cascades3D 
 cascades3D <- function(N=200,R=10,betadistrib=rep(1,200),utility=seq(0,1,length.out=10),time=2,captl=-1,IC=50,summary=T,Nmax=NULL,mu_c=0,mu_r=0,dtime=0,stime=-1,memory=T,log=T,metrics=c("size","depth","breadth"),debug=F){
         

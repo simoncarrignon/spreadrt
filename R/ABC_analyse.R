@@ -7,7 +7,7 @@
 #'@param log if true, show the name of the folder scanned
 #'@return a list of list of list
 #'
-#' @export getAllscores 
+#'@export getAllscores 
 getAllscores <- function(mainfold,idscores=c("kc","kokc","qc","kcrev","kokcrev"),metrics=c("depth","breadth","size"),log=T,lim=NULL){
     #With all the folder we can now get all the scores
     if(is.character(lim))
