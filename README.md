@@ -6,9 +6,8 @@ R-package with the code used for the paper: _Modelling rapid online cultural tra
 
 ## Install the package
 
-To install the 'spreadrt' package directly from this git repository you can:
-Clone the repository 
-
+To install the 'spreadrt' package directly from this git repository you can use different option:
+1. Clone the repository 
 ```bash
 git clone https://github.com/simoncarrignon/spreadrt.git
 ```
@@ -17,7 +16,7 @@ and install from source:
 install.packages("spreadrt",repos=NULL,type="source")
 library(spreadrt)
 ```
-Or you can use `install_github` function from package `devtools`:
+2. Or you can use `install_github` function from package `devtools`:
 ```R
 library(devtools)
 devtools::install_github("simoncarrignon/spreadrt")
@@ -43,13 +42,17 @@ A simpler and more straightforward way is to go to the compiled version of the v
 - [abc_spreadrt.html](https://simoncarrignon.github.io/spreadrt/vignettes/abc_spreadrt.html)
 
 ## Modify the package
-If you plan to modify the package and want to check your modifications you need to start `R` from the git folder and use the packages `devtools` and `roxygen2`
+If you plan to modify the package and want to check your modifications you need to clone the repository:
+```bash
+git clone https://github.com/simoncarrignon/spreadrt.git
+
+Then start `R` from the git folder and use the packages `devtools` and `roxygen2`
 ```R
 library(devtools)
 library(roxygen2)
 ```
 
-then if you modify some code within the package you can use: 
+then if you modify some code within the package you use: 
 * `load_all()` to update the code  
 * `documentation()` to update the documentation
 
