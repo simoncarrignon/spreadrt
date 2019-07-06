@@ -1,5 +1,7 @@
 # Twitter Spread R-package
 
+R-package with the code used for the paper: _Modelling rapid online cultural transmission: Evaluating neutral models on Twitter data with Approximate Bayesian Computation_ in _Palgrave Communication_ special issue on Cultural Evolution.   
+
 ## Install the package
 
 To install the 'spread' package directly from this git repository you can:
@@ -33,7 +35,10 @@ and the function:
 build_vignettes()
 ```
 
-Once it's done (it can take some time as it as to run some simulations and generate graphs), you can then then open the html results file that should have been created in `inst/doc/` [spread.html](inst/doc/spread.html) and  [abc_spread.html](inst/doc/abc_spread.html).
+__warning__: Building the vignettes takes time (more than 30 minutes) as it as to run bunch of simulations and generate graphs.
+
+
+Once it's done , you can then then open the html results file that should have been created in `inst/doc/` [spreadrt.html](inst/doc/spreadrt.html) and  [abc_spreadrt.html](inst/doc/abc_spread.html).
 
 
 ## Modify the package
@@ -48,6 +53,6 @@ then if you modify some code within the package you can use:
 * `documentation()` to update the documentation
 
 
-## exec subfolder
+## Approximate Bayesian Computation and `exec` subfolder
 
 Some of the scripts used to run the ABC have been stored in `exec/abcdir` as well as some script used to generate the plot of the paper in `exec/palcomm`. Though those script are very hardware and problem specific they could be of some use and part of those script should be integrated in functions or vignette in the main package.
