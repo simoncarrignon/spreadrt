@@ -425,7 +425,7 @@ simu=cascades3D(betadistrib=popbeta,time=20) #we use the longer time step
 par(mfrow=c(1,3))
 for( m in c("size","depth","breadth")){
     plotCCFD(allca[,m],cex=1,main=m,xlim=c(1,max(simu[,m],allca[,m])))
-    pointsCCFD(simu[,m],cex=1.5,col=spread::getUCols(simu$U)[order(simu[,m])],pch=20)
+    pointsCCFD(simu[,m],cex=1.5,col=spreadrt::getUCols(simu$U)[order(simu[,m])],pch=20)
     legend("bottomleft",legend=c(paste0("U=",round(utilities,digit=2)),"data"),col=c(cols,1),pch=c(rep(20,length(utilities)),20),cex=.8)
 }
 ```
@@ -452,13 +452,13 @@ for( m in c("size","depth","breadth")){
 }
 ```
 
-In those simulation the number of cascade is small compared to what appear in  the data set $ncascade_{data}=$`r nrow(allca)` vs $ncascade_{data}=$`r nrow(simu)`, due to the fact that by default no new cascades appears in the simulation. This can be change by setting up the parameter `lambda_c > 0` and setting a bigger number of initial cascades `IC`. To allow cascades to grow bigger, we also need to have more agent able to retweet it. But as the model keep track of all the cascades, allowing all the agents to retweet all the cascades regardless their apparition time, this can take long time and is not realistic. It is the equivalent of saying that at any time people will look at all the tweets that ever happen before retweeting something. To avoid that we set a `captl` parameters that limit the total number of tweet an agent can access to, a `Nmax` parameter that limits the number of agents that retweet at any given time and a `dtime` that defines a number of timestep after which if not retweeted, a cascades cannot be accessed anymore by the agents.
+In those simulation the number of cascade is small compared to what appear in  the data set $ncascade_{data}=$`r nrow(allca)` vs $ncascade_{data}=$`r nrow(simu)`, due to the fact that by default no new cascades appears in the simulation. This can be change by setting up the parameter `mu_c > 0` and setting a bigger number of initial cascades `IC`. To allow cascades to grow bigger, we also need to have more agent able to retweet it. But as the model keep track of all the cascades, allowing all the agents to retweet all the cascades regardless their apparition time, this can take long time and is not realistic. It is the equivalent of saying that at any time people will look at all the tweets that ever happen before retweeting something. To avoid that we set a `captl` parameters that limit the total number of tweet an agent can access to, a `Nmax` parameter that limits the number of agents that retweet at any given time and a `dtime` that defines a number of timestep after which if not retweeted, a cascades cannot be accessed anymore by the agents.
 
 ```{r,results='hide',fig.keep='all'}
 n=3000 #we change the number of agents to easily divide by 3
 popbeta=c(rep(-100,n/3),rep(0,n/3),rep(100,n/3))
 r=30 #number of rumors
-simu=cascades3D(betadistrib=popbeta,N=n,R=r,utility=utilities,time=20,lambda_c=.02,IC=1000,captl=.1,dtime=3,Nmax=.1,log=F) 
+simu=cascades3D(betadistrib=popbeta,N=n,R=r,utility=utilities,time=20,mu_c=.02,IC=1000,captl=.1,dtime=3,Nmax=.1,log=F) 
 ```
 
 With more cascade we can now start to see there distribution separatly, as done by Vosoughi et al:
@@ -650,7 +650,7 @@ for(s in step){
     plotCCFD(1,1,type="n",ylim=c(0.01,100),xlim=c(1,10000),main=paste("time=",round(s)))
     sapply(1:length(mu),function(i)
            {
-               pointsCCFD(cascades3D(time=s,N=1000,Nmax=.2,R=50,IC=10,utility=runif(50,-1,1),betadistrib=rep(0,1000),lambda_c=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
+               pointsCCFD(cascades3D(time=s,N=1000,Nmax=.2,R=50,IC=10,utility=runif(50,-1,1),betadistrib=rep(0,1000),mu_c=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
            }
     )
 }
@@ -665,7 +665,7 @@ nagent=c(100,200,300) #a sequence of different number of step
 #    plotCCFD(1,1,type="n",ylim=c(0.0001,100),xlim=c(1,100000),main=paste("Num of Agents=",n))
 #    sapply(1:length(mu),function(i)
 #           {
-#               pointsCCFD(cascades3D(N=n,Nmax=.2,R=50,IC=10,utility=runif(50,-1,1),betadistrib=rep(0,n),time=s,lambda_c=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
+#               pointsCCFD(cascades3D(N=n,Nmax=.2,R=50,IC=10,utility=runif(50,-1,1),betadistrib=rep(0,n),time=s,mu_c=mu[i])$size,col=alpha(cols[i],.8),type="l",lwd=2,cex=1)
 #           }
 #    )
 #}

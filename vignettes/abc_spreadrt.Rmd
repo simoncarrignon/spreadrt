@@ -583,7 +583,7 @@ then the list of parameter for j are:
 param_j=lapply(parameters,function(p,ind=j)if(!is.null(dim(p)))p[ind,]else p[ind])
 ```
 
-We know that the classes for the beta value of the agent are : `prior_beta`  = `r prior_beta`
+We know that the classes for the beta value of the agent are : `prior_beta`  = `r print(prior_beta)`
 
 Then can say that in the simulation `r j`, we will have `param_j$betaDistrib[1]` $=$ `r param_j$betaDistrib[1]` agent with $\beta = `r prior_beta[1]`$ .
 

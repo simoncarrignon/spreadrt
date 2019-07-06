@@ -4,7 +4,7 @@ R-package with the code used for the paper: _Modelling rapid online cultural tra
 
 ## Install the package
 
-To install the 'spread' package directly from this git repository you can:
+To install the 'spreadrt' package directly from this git repository you can:
 
 Clone the repository 
 
@@ -38,7 +38,7 @@ build_vignettes()
 __warning__: Building the vignettes takes time (more than 30 minutes) as it as to run bunch of simulations and generate graphs.
 
 
-Once it's done , you can then then open the html results file that should have been created in `inst/doc/` [spreadrt.html](inst/doc/spreadrt.html) and  [abc_spreadrt.html](inst/doc/abc_spread.html).
+Once it's done , you can then then open the html results file that should have been created in `inst/doc/` at the follwing URLs: [spreadrt.html](inst/doc/spreadrt.html) and  [abc_spreadrt.html](inst/doc/abc_spread.html).
 
 
 ## Modify the package
@@ -55,4 +55,6 @@ then if you modify some code within the package you can use:
 
 ## Approximate Bayesian Computation and `exec` subfolder
 
-Some of the scripts used to run the ABC have been stored in `exec/abcdir` as well as some script used to generate the plot of the paper in `exec/palcomm`. Though those script are very hardware and problem specific they could be of some use and part of those script should be integrated in functions or vignette in the main package.
+Some of the scripts used to run the ABC have been stored in `exec/abcdir` as well as some script used to generate the plot of the paper in `exec/palcomm`. Though those script are very hardware and problem specific they could be of some use (for people using SLURM and MPI mainly). 
+
+__TODO__: Part of those script should be integrated in functions and vignette in the main package.
