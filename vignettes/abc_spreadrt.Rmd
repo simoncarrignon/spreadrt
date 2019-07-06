@@ -400,32 +400,32 @@ Using HPC facilities we ran 4.5 millions simulation, using the same general idea
 
 We first check the distribution of both distances for all simulation
 
-![dens](../../doc/images/random_model/density_bothscore.png)
+![dens](images/random_model/density_bothscore.png)
 
 And we see how both distances are correlated
 
-![cor](../../doc/images/random_model/correlation_bothscore.png)
+![cor](images/random_model/correlation_bothscore.png)
 
 
 ### Analyse the posteriors
 
 Then we select the best 500 simulations and draw the  posteriors distribution
 
-![all-posterior](../../doc/images/random_model/posterior_distrib.png)
+![all-posterior](images/random_model/posterior_distrib.png)
 
 In those representation the red distribution represent the prior distribution, the blue one the posterior for the model compared to the rumors size and the yellow one the model when compared to the cascades size
 
 Du to it's strong impact on both model we redraw the graph for the posteriors of mu:
 
-![mu-posterior](../../doc/images/random_model/mu_distrib.png)
+![mu-posterior](images/random_model/mu_distrib.png)
 
 $\mu$ has to be around $2\times10^4$ for the model to be able to produce the distribution observed in the data set when taking the rumor size, whears it as to be betwen .2 and .3 when trying. This part may not be relevent as the results given when trying to fit the cascades size are not very relevent, but it's interesting to notice it.
 
 we can also check if some parameters are correlated:
 
-![corel-param-ru](../../doc/images/random_model/param_corel_rumor.png)
+![corel-param-ru](images/random_model/param_corel_rumor.png)
 
-![corel-param-ca](../../doc/images/random_model/param_corel_ca.png)
+![corel-param-ca](images/random_model/param_corel_ca.png)
 
 
 ### Post validation of posteriors
@@ -435,15 +435,15 @@ When trying to fit the model to the whole rumor size:
 
 Check all the parameter selected by the rejection algorithm:
 
-![rumors](../../doc/images/random_model/rumors_postcheck.png)
+![rumors](images/random_model/rumors_postcheck.png)
 
 check the best set of parameters
 
-![rumors-best](../../doc/images/random_model/rumors_best_postcheck.png)
+![rumors-best](images/random_model/rumors_best_postcheck.png)
 
 check the median of the distribution of parameters
 
-![rumors-median](../../doc/images/random_model/rumors_median_postcheck.png)
+![rumors-median](images/random_model/rumors_median_postcheck.png)
 
 
 
@@ -453,15 +453,15 @@ When trying to fit the model to each cascades size:
 
 check all the parameter selected by the rejection algorithm:
 
-![cascades](../../doc/images/random_model/cascades_postcheck.png)
+![cascades](images/random_model/cascades_postcheck.png)
 
 check the best set of parameters
 
-![cascades-best](../../doc/images/random_model/cascades_best_postcheck.png)
+![cascades-best](images/random_model/cascades_best_postcheck.png)
 
 check the median of the distribution of parameters
 
-![cascades-median](../../doc/images/random_model/cascades_median_postcheck.png)
+![cascades-median](images/random_model/cascades_median_postcheck.png)
 
 
 The visual post check of the posteriors distribution already show us that the model is clearly not able to reproduce the distribution of cascades, which we already guessed through the first simplest analysis.
@@ -1004,51 +1004,51 @@ legend("bottomleft",legend=c("data","simulation using best fit"),col=c("black",a
 
 We first check the distribution of both distances for all simulation
 
-![dens](../../doc/images/3D_model/density_scores_3D.png)
+![dens](images/3D_model/density_scores_3D.png)
 
 And we see how both distances are correlated
 
-![cor](../../doc/images/3D_model/correlation_scores_3D.png)
+![cor](images/3D_model/correlation_scores_3D.png)
 
 
 ### Analyse the posteriors
 
 Then we select the best 500 simulations and draw the  posteriors distribution but of which score? couillon. tu dois tous les faire
 
-<!--![all-posterior](../../doc/images/3D_model/posterior_distrib_3D.png)-->
+<!--![all-posterior](images/3D_model/posterior_distrib_3D.png)-->
 
 In those representation the red distribution represent the prior distribution, the blue one the posterior for the model compared to the rumors size and the yellow one the model when compared to the cascades size
 
 Du to it's strong impact on both model we redraw the graph for the posteriors of $lambda_c$:
 
-![mu-posterior](../../doc/images/3D_model/lambda_c_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/N_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/Nmax_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/R_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/IC_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/dtime_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/stime_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/captl_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/repetition_distrib_3D.png)
+![mu-posterior](images/3D_model/lambda_c_distrib_3D.png)
+![mu-posterior](images/3D_model/N_distrib_3D.png)
+![mu-posterior](images/3D_model/Nmax_distrib_3D.png)
+![mu-posterior](images/3D_model/R_distrib_3D.png)
+![mu-posterior](images/3D_model/IC_distrib_3D.png)
+![mu-posterior](images/3D_model/dtime_distrib_3D.png)
+![mu-posterior](images/3D_model/stime_distrib_3D.png)
+![mu-posterior](images/3D_model/captl_distrib_3D.png)
+![mu-posterior](images/3D_model/repetition_distrib_3D.png)
 
 The utility distribution
-![mu-posterior](../../doc/images/3D_model/utility.1_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/utility.2_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/utility.3_distrib_3D.png)
+![mu-posterior](images/3D_model/utility.1_distrib_3D.png)
+![mu-posterior](images/3D_model/utility.2_distrib_3D.png)
+![mu-posterior](images/3D_model/utility.3_distrib_3D.png)
 
 The betas of the people 
-![mu-posterior](../../doc/images/3D_model/betaDistrib.1_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/betaDistrib.2_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/betaDistrib.3_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/betaDistrib.4_distrib_3D.png)
-![mu-posterior](../../doc/images/3D_model/betaDistrib.5_distrib_3D.png)
+![mu-posterior](images/3D_model/betaDistrib.1_distrib_3D.png)
+![mu-posterior](images/3D_model/betaDistrib.2_distrib_3D.png)
+![mu-posterior](images/3D_model/betaDistrib.3_distrib_3D.png)
+![mu-posterior](images/3D_model/betaDistrib.4_distrib_3D.png)
+![mu-posterior](images/3D_model/betaDistrib.5_distrib_3D.png)
 
 
 we can also check if some parameters are correlated:
 
-![corel-param-ru](../../doc/images/3D_model/parametercorrelation_kc_size.png)
-![corel-param-ru](../../doc/images/3D_model/parametercorrelation_kc_depth.png)
-![corel-param-ru](../../doc/images/3D_model/parametercorrelation_kc_breadth.png)
+![corel-param-ru](images/3D_model/parametercorrelation_kc_size.png)
+![corel-param-ru](images/3D_model/parametercorrelation_kc_depth.png)
+![corel-param-ru](images/3D_model/parametercorrelation_kc_breadth.png)
 
 <!--
 

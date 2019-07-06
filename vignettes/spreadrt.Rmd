@@ -596,7 +596,7 @@ nada=lapply(order(cid$U),function(g){plot(allsubgraph[[g]],layout=layout_as_tree
 ```
 Or follow the evolution of the network of one (or all) cascade(s).
 
-![giftree](../../doc/images/giftree.gif)
+![giftree](images/giftree.gif)
 
 
 ```{r testb,fig.width=1.5*w,fig.height=1.5*h,fig.show='animate', interval=.1,eval=F}
